@@ -38,8 +38,6 @@ before_install:
     - source deactivate ipykernel_py2
 
 sudo: required
-services:
-    - docker
 install: "python setup.py install"
 before_script:
     - cd test
