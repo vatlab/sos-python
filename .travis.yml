@@ -40,6 +40,7 @@ before_install:
     - source activate ipykernel_py2
     - python -m ipykernel install --user
     - source deactivate ipykernel_py2
+    - source activate python_test
 
 sudo: required
 install: "python setup.py install"
