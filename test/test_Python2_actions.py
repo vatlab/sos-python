@@ -53,7 +53,7 @@ class TestActions(unittest.TestCase):
 
         script = SoS_Script(r'''
 [0]
-python2:
+python2: sigil='${ }'
 a = {'1', '2'}
 print a
 ''')

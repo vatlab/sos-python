@@ -52,7 +52,7 @@ class TestActions(unittest.TestCase):
         default interpreter'''
         script = SoS_Script(r'''
 [0]
-python:
+python: sigil='${ }'
 a = {'1': 2}
 print(a)
 ''')
@@ -63,7 +63,7 @@ print(a)
     def testPython3(self):
         script = SoS_Script(r'''
 [0]
-python3:
+python3: sigil='${ }'
 a = {'1', '2'}
 print(a)
 ''')
