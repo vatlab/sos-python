@@ -25,7 +25,7 @@ import unittest
 from sos.utils import env
 from sos.sos_script import SoS_Script
 from sos.sos_executor import Base_Executor
-from sos.target import FileTarget
+from sos.target import file_target
 
 class TestTarget(unittest.TestCase):
     def setUp(self):
@@ -34,11 +34,11 @@ class TestTarget(unittest.TestCase):
 
     def tearDown(self):
         for f in self.temp_files:
-            FileTarget(f).remove('both')
+            file_target(f).remove('both')
 
     def testPy_Module(self):
         '''Test target Py_Module'''
-        FileTarget('report.md').remove('both')
+        file_target('report.md').remove('both')
         script = SoS_Script(r'''
 [10]
 depends: Py_Module('tabulate')
@@ -50,7 +50,7 @@ report: output='report.md', expand=True
 ''')
         wf = script.workflow()
         Base_Executor(wf).run()
-        self.assertTrue(FileTarget('report.md').exists('target'))
+        self.assertTrue(file_target('report.md').exists('target'))
         with open('report.md') as rep:
             self.assertEqual(rep.read().strip(), '''
 -----  ------  -------------
