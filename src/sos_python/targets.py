@@ -42,7 +42,7 @@ class Py_Module(BaseTarget):
         ret = subprocess.call(['pip', 'install', self._module])
         return ret == 0
 
-    def exists(self, mode='any'):
+    def target_exists(self, mode='any'):
         if self._module in self.LIB_STATUS_CACHE:
             return self.LIB_STATUS_CACHE[self._module]
         else:
@@ -50,9 +50,9 @@ class Py_Module(BaseTarget):
             self.LIB_STATUS_CACHE[self._module] = ret
             return ret
 
-    def name(self):
+    def target_name(self):
         return self._module
 
-    def signature(self, mode='any'):
+    def target_signature(self, mode='any'):
         # we are supposed to get signature of the module, but we cannot
         return textMD5('Python module ' + self._module)
