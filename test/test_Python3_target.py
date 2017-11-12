@@ -50,7 +50,7 @@ report: output='report.md', expand=True
 ''')
         wf = script.workflow()
         Base_Executor(wf).run()
-        self.assertTrue(file_target('report.md').exists('target'))
+        self.assertTrue(file_target('report.md').target_exists('target'))
         with open('report.md') as rep:
             self.assertEqual(rep.read().strip(), '''
 -----  ------  -------------
