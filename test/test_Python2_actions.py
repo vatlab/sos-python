@@ -26,7 +26,7 @@ import shutil
 from sos.parser import SoS_Script
 from sos.utils import env
 from sos.workflow_executor import Base_Executor
-from sos.targets import FileTarget
+from sos.targets import file_target
 
 class TestActions(unittest.TestCase):
     def setUp(self):
@@ -35,7 +35,7 @@ class TestActions(unittest.TestCase):
 
     def tearDown(self):
         for f in self.temp_files:
-            FileTarget(f).remove('both')
+            file_target(f).remove('both')
 
     def touch(self, files):
         '''create temporary files'''
