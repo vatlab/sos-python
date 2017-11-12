@@ -60,7 +60,7 @@ setup(name = "sos-python",
       ],
     entry_points= '''
 [sos_targets]
-Py_Module = sos_python.target:Py_Module
+Py_Module = sos_python.targets:Py_Module
 
 [sos_actions]
 python = sos_python.actions:python
