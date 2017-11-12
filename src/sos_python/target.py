@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from sos.target import BaseTarget, textMD5
+from sos.targets import BaseTarget, textMD5
 import importlib
 
 class Py_Module(BaseTarget):

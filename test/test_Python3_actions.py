@@ -22,10 +22,10 @@
 
 import unittest
 
-from sos.sos_script import SoS_Script
+from sos.parser import SoS_Script
 from sos.utils import env
-from sos.sos_executor import Base_Executor
-from sos.target import FileTarget
+from sos.workflow_executor import Base_Executor
+from sos.targets import FileTarget
 
 class TestActions(unittest.TestCase):
     def setUp(self):
