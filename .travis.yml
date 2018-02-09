@@ -30,7 +30,8 @@ before_install:
 
     # SoS Notebook
     - pip install jedi notebook nbconvert nbformat pyyaml psutil tqdm scipy
-    - pip install pygments ipython wand graphviz sos sos-bash
+    - pip install pygments ipython wand graphviz sos sos-notebook
+    - python -m sos_notebook.install
 
     # Python 2
     - conda create -n ipykernel_py2 python=2 ipykernel
