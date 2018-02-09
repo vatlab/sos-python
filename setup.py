@@ -55,18 +55,10 @@ setup(name = "sos-python",
     packages = find_packages('src'),
     package_dir = {'': 'src'},
     install_requires=[
-          'sos>=0.9.10.11',
+          'sos>=0.9.12.0',
           'sos-notebook>=0.9.10.9',
       ],
     entry_points= '''
-[sos_targets]
-Py_Module = sos_python.targets:Py_Module
-
-[sos_actions]
-python = sos_python.actions:python
-python2 = sos_python.actions:python2
-python3 = sos_python.actions:python3
-
 [sos_languages]
 Python2 = sos_python.kernel:sos_Python
 Python3 = sos_python.kernel:sos_Python
