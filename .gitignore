@@ -12,3 +12,4 @@ process.sh
 process_homepage.sh
 *.pem
 *.pyc
+*.bak
