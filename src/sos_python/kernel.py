@@ -55,8 +55,8 @@ class sos_Python:
     supported_kernels = {'Python3': ['python3'], 'Python2': ['python2']}
     background_color = {'Python2': '#FFE771', 'Python3': '#FFD91A'}
     options = {
-        'variable_pattern': r'^[_A-Za-z0-9\.]+\s*$',
-        'assignment_pattern': r'^([_A-Za-z0-9\.]+)\s*=.*$'
+        'variable_pattern': r'^\s*[_A-Za-z0-9\.]+\s*$',
+        'assignment_pattern': r'^\s*([_A-Za-z0-9\.]+)\s*=.*$'
         }
 
     def __init__(self, sos_kernel, kernel_name='python3'):
