@@ -58,6 +58,7 @@ class sos_Python:
         'variable_pattern': r'^\s*[_A-Za-z0-9\.]+\s*$',
         'assignment_pattern': r'^\s*([_A-Za-z0-9\.]+)\s*=.*$'
         }
+    cd_command = 'import os;os.chdir({dir!r})'
 
     def __init__(self, sos_kernel, kernel_name='python3'):
         self.sos_kernel = sos_kernel
