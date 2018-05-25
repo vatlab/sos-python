@@ -46,7 +46,7 @@ install:
 
     # install sos-r
     - pip install pytest
-    - python setup.py install
+    - pip install . -U
 
 test_script:
     - cd test
