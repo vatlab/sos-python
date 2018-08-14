@@ -33,14 +33,13 @@ def __loaded_modules__():
 '''
 
 
-
 class sos_Python:
     supported_kernels = {'Python3': ['python3'], 'Python2': ['python2']}
     background_color = {'Python2': '#FFF177', 'Python3': '#FFD91A'}
     options = {
         'variable_pattern': r'^\s*[_A-Za-z0-9\.]+\s*$',
         'assignment_pattern': r'^\s*([_A-Za-z0-9\.]+)\s*=.*$'
-        }
+    }
     cd_command = 'import os;os.chdir({dir!r})'
 
     def __init__(self, sos_kernel, kernel_name='python3'):
@@ -52,10 +51,14 @@ class sos_Python:
         self.sos_kernel.run_cell("import pickle", True, False)
         for name in names:
             if self.kernel_name == 'python3':
-                stmt = "globals().update(pickle.loads({!r}))\n".format(pickle.dumps({name:env.sos_dict[name]}))
+                stmt = "globals().update(pickle.loads({!r}))\n".format(
+                    pickle.dumps({name: env.sos_dict[name]}))
             else:
-                stmt = "globals().update(pickle.loads({!r}))\n".format(pickle.dumps({name: env.sos_dict[name]}, protocol=2, fix_imports=True))
-            self.sos_kernel.run_cell(stmt, True, False, on_error='Failed to get variable {} from SoS to {}'.format(name, self.kernel_name))
+                stmt = "globals().update(pickle.loads({!r}))\n".format(
+                    pickle.dumps({name: env.sos_dict[name]}, protocol=2, fix_imports=True))
+            self.sos_kernel.run_cell(
+                stmt,
+                True, False, on_error='Failed to get variable {} from SoS to {}'.format(name, self.kernel_name))
 
     def load_pickled(self, item):
         if isinstance(item, bytes):
@@ -63,15 +66,23 @@ class sos_Python:
         elif isinstance(item, str):
             return pickle.loads(item.encode('utf-8'))
         else:
-            self.warn('Cannot restore from result of pickle.dumps: {}'.format(short_repr(item)))
+            self.warn('Cannot restore from result of pickle.dumps: {}'.format(
+                short_repr(item)))
             return {}
 
     def put_vars(self, items, to_kernel=None):
-        stmt = 'import pickle\n__vars__={{ {} }}\n__vars__.update({{x:y for x,y in locals().items() if x.startswith("sos")}})\npickle.dumps(__vars__)'.format(','.join('"{0}":{0}'.format(x) for x in items))
-        response = self.sos_kernel.get_response(stmt, ['execute_result'])[0][1]
+        stmt = 'import pickle\n__vars__={{ {} }}\n__vars__.update({{x:y for x,y in locals().items() if x.startswith("sos")}})\npickle.dumps(__vars__)'.format(
+            ','.join('"{0}":{0}'.format(x) for x in items))
+        try:
+            # sometimes python2 kernel would fail to send a execute_result and lead to an error
+            response = self.sos_kernel.get_response(
+                stmt, ['execute_result'])[0][1]
+        except:
+            return {}
+
         # Python3 -> Python3
         if (self.kernel_name == 'python3' and to_kernel == 'Python3') or \
-            (self.kernel_name == 'python2' and to_kernel == 'Python2'):
+                (self.kernel_name == 'python2' and to_kernel == 'Python2'):
             # to self, this should allow all variables to be passed
             return 'import pickle\nglobals().update(pickle.loads({}))'.format(response['data']['text/plain'])
         try:
@@ -80,9 +91,11 @@ class sos_Python:
                 self.sos_kernel.warn('Get: {}'.format(ret))
             return ret
         except Exception as e:
-            self.sos_kernel.warn('Failed to import variables {}: {}'.format(items, e))
+            self.sos_kernel.warn(
+                'Failed to import variables {}: {}'.format(items, e))
             return {}
 
     def sessioninfo(self):
-        modules = self.sos_kernel.get_response('import pickle;import sys;res=[("Version", sys.version)];res.extend(__loaded_modules__());pickle.dumps(res)', ['execute_result'])[0][1]
+        modules = self.sos_kernel.get_response(
+            'import pickle;import sys;res=[("Version", sys.version)];res.extend(__loaded_modules__());pickle.dumps(res)', ['execute_result'])[0][1]
         return self.load_pickled(eval(modules['data']['text/plain']))
