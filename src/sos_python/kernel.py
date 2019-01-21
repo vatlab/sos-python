@@ -66,6 +66,8 @@ class sos_Python:
         elif isinstance(item, str):
             return pickle.loads(item.encode('utf-8'))
         else:
+            self.sos_kernel.warn('Cannot restore from result of pickle.dumps: {}'.format(short_repr(item)))
+            return {}
 
     def put_vars(self, items, to_kernel=None):
         stmt = 'import pickle\n__vars__={{ {} }}\n__vars__.update({{x:y for x,y in locals().items() if x.startswith("sos")}})\npickle.dumps(__vars__)'.format(
