@@ -18,10 +18,6 @@ before_install:
     - conda update -q conda
     - conda info -a
 
-    # downgrade python if needed
-    - conda create -n python_test python=$TRAVIS_PYTHON_VERSION anaconda
-    - source activate python_test
-
     - pip install docker rq
     - pip install pyyaml psutil tqdm nose
     - pip install fasteners pygments networkx pydot pydotplus 
