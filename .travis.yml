@@ -10,7 +10,7 @@ before_install:
     # Base SoS
     - sudo apt-get update
     - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
-    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+    - wget https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O miniconda.sh
     - bash miniconda.sh -b -p $HOME/miniconda
     - export PATH="$HOME/miniconda/bin:$PATH"
     - hash -r
@@ -34,7 +34,6 @@ before_install:
     - source activate ipykernel_py2
     - python -m ipykernel install --user
     - source deactivate ipykernel_py2
-    - source activate python_test
 
 sudo: required
 install: "pip install . -U"
