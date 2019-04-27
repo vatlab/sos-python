@@ -55,10 +55,15 @@ class sos_Python:
                     pickle.dumps({name: env.sos_dict[name]}))
             else:
                 stmt = "globals().update(pickle.loads({!r}))\n".format(
-                    pickle.dumps({name: env.sos_dict[name]}, protocol=2, fix_imports=True))
+                    pickle.dumps({name: env.sos_dict[name]},
+                                 protocol=2,
+                                 fix_imports=True))
             self.sos_kernel.run_cell(
                 stmt,
-                True, False, on_error='Failed to get variable {} from SoS to {}'.format(name, self.kernel_name))
+                True,
+                False,
+                on_error='Failed to get variable {} from SoS to {}'.format(
+                    name, self.kernel_name))
 
     def load_pickled(self, item):
         if isinstance(item, bytes):
@@ -66,7 +71,9 @@ class sos_Python:
         elif isinstance(item, str):
             return pickle.loads(item.encode('utf-8'))
         else:
-            self.sos_kernel.warn('Cannot restore from result of pickle.dumps: {}'.format(short_repr(item)))
+            self.sos_kernel.warn(
+                'Cannot restore from result of pickle.dumps: {}'.format(
+                    short_repr(item)))
             return {}
 
     def put_vars(self, items, to_kernel=None):
@@ -74,8 +81,8 @@ class sos_Python:
             ','.join('"{0}":{0}'.format(x) for x in items))
         try:
             # sometimes python2 kernel would fail to send a execute_result and lead to an error
-            response = self.sos_kernel.get_response(
-                stmt, ['execute_result'])[-1][1]
+            response = self.sos_kernel.get_response(stmt,
+                                                    ['execute_result'])[-1][1]
         except:
             return {}
 
@@ -83,18 +90,20 @@ class sos_Python:
         if (self.kernel_name == 'python3' and to_kernel == 'Python3') or \
                 (self.kernel_name == 'python2' and to_kernel == 'Python2'):
             # to self, this should allow all variables to be passed
-            return 'import pickle\nglobals().update(pickle.loads({}))'.format(response['data']['text/plain'])
+            return 'import pickle\nglobals().update(pickle.loads({}))'.format(
+                response['data']['text/plain'])
         try:
             ret = self.load_pickled(eval(response['data']['text/plain']))
             if self.sos_kernel._debug_mode:
                 self.sos_kernel.warn('Get: {}'.format(ret))
             return ret
         except Exception as e:
-            self.sos_kernel.warn(
-                'Failed to import variables {}: {}'.format(items, e))
+            self.sos_kernel.warn('Failed to import variables {}: {}'.format(
+                items, e))
             return {}
 
     def sessioninfo(self):
         modules = self.sos_kernel.get_response(
-            'import pickle;import sys;res=[("Version", sys.version)];res.extend(__loaded_modules__());pickle.dumps(res)', ['execute_result'])[0][1]
+            'import pickle;import sys;res=[("Version", sys.version)];res.extend(__loaded_modules__());pickle.dumps(res)',
+            ['execute_result'])[0][1]
         return self.load_pickled(eval(modules['data']['text/plain']))
