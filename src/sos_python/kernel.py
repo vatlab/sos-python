@@ -102,6 +102,7 @@ class sos_Python:
                 items, e))
             return {}
 
+
     def sessioninfo(self):
         modules = self.sos_kernel.get_response(
             'import pickle;import sys;res=[("Version", sys.version)];res.extend(__loaded_modules__());pickle.dumps(res)',
