@@ -33,9 +33,14 @@ install:
     # Useful for debugging any issues with conda
     - conda info -a
     # packages required by SoS
-    - pip install jedi pyyaml psutil tqdm  selenium
-    - pip install fasteners pygments ipython ptpython networkx pydot pydotplus nose
-    - pip install entrypoints numpy pandas sos sos-notebook
+    - pip install pyyaml psutil tqdm nose selenium
+    - pip install fasteners pygments networkx pydot pydotplus
+    - pip install entrypoints jupyter coverage codacy-coverage pytest pytest-cov python-coveralls
+    - conda install pandas numpy
+
+    # SoS Notebook
+    - pip install jedi notebook nbconvert nbformat pyyaml psutil tqdm scipy
+    - pip install pygments ipython wand graphviz sos sos-notebook
     - python -m sos_notebook.install
 
     # install Python 2 kernel
@@ -45,7 +50,6 @@ install:
     - conda deactivate
 
     # install sos-r
-    - pip install pytest
     - pip install . -U
 
 test_script:

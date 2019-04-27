@@ -20,7 +20,6 @@ before_install:
     - conda update -q conda
     - conda info -a
 
-    - pip install docker rq
     - pip install pyyaml psutil tqdm nose selenium
     - pip install fasteners pygments networkx pydot pydotplus
     - pip install entrypoints jupyter coverage codacy-coverage pytest pytest-cov python-coveralls
@@ -37,7 +36,6 @@ before_install:
     - python -m ipykernel install --user
     #- source deactivate ipykernel_py2
     - conda deactivate
-
 
     # selenium
     - wget https://chromedriver.storage.googleapis.com/74.0.3729.6/chromedriver_linux64.zip
