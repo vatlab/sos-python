@@ -41,8 +41,8 @@ install:
     # install Python 2 kernel
     - conda create -n ipykernel_py2 python=2 ipykernel
     - activate ipykernel_py2
-    - python -m ipykernel install
-    - deactivate
+    - python -m ipykernel install --user
+    - conda deactivate
 
     # install sos-r
     - pip install pytest
