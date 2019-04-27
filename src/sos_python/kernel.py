@@ -6,7 +6,16 @@
 import pickle
 from sos.utils import short_repr, env
 
-__init_statement__ = '''
+#
+# These functions will be imported by both Python2 and Python3 and cannot
+# use any python3-specific syntax (e.g. f-string)
+#
+__init_statement__ = r'''
+from collections import Sized, KeysView, Sequence
+from types import ModuleType
+import pydoc
+import pickle
+
 def __version_info__(module):
     # return the version of Python module
     try:
@@ -30,6 +39,82 @@ def __loaded_modules__():
         if isinstance(value, ModuleType):
             res.append([value.__name__, __version_info__(value.__name__)])
     return [(x,y) for x,y in res if y != 'na']
+
+
+def __short_repr(obj):
+    if obj is None:
+        return 'None'
+    elif isinstance(obj, str) and len(obj) > 80:
+        return '{}...{}'.format(obj[:60].replace('\n', '\\n'),
+                                obj[-20:].replace('\n', '\\n'))
+    elif isinstance(obj, (str, int, float, bool)):
+        return repr(obj)
+    elif hasattr(obj, '__short_repr__'):
+        return obj.__short_repr__()
+    elif isinstance(obj, Sequence):  # should be a list or tuple
+        if len(obj) == 0:
+            return '[]'
+        elif len(obj) == 1:
+            return __short_repr(obj[0])
+        elif len(obj) == 2:
+            return __short_repr(obj[0]) + ', ' + __short_repr(obj[1])
+        else:
+            return __short_repr(obj[0]) + ', ' + __short_repr(obj[1]) + ', ... (' + str(len(obj)) + ' items)'
+    elif isinstance(obj, dict):
+        if not obj:
+            return ''
+        elif len(obj) == 1:
+            first_key = list(obj.keys())[0]
+            return __short_repr(repr(first_key)) + ':' + __short_repr(obj[first_key])
+        else:
+            first_key = list(obj.keys())[0]
+            return __short_repr(first_key) + ':' + __short_repr(obj[first_key]) + ', ... (' + str(len(obj)) + ' items)'
+    elif isinstance(obj, KeysView):
+        if not obj:
+            return ''
+        elif len(obj) == 1:
+            return __short_repr(next(iter(obj)))
+        else:
+            return __short_repr(next(iter(obj))) + ', ... (' + str(len(obj)) + ' items)'
+    else:
+        ret = str(obj)
+        if len(ret) > 40:
+            return repr(obj)[:35] + '...'
+        else:
+            return ret
+
+
+def __preview_var(item):
+    # check if 'item' is in the subkernel
+    if item not in globals():
+        return '', 'Unknown variable {}'.format(item)
+
+    obj = eval(item)
+
+    # get the basic information of object
+    txt = type(obj).__name__
+    # we could potentially check the shape of data frame and matrix
+    # but then we will need to import the numpy and pandas libraries
+    if hasattr(obj, 'shape') and getattr(obj, 'shape') is not None:
+        txt += ' of shape ' + str(getattr(obj, "shape"))
+    elif isinstance(obj, Sized):
+        txt += ' of length ' + str(obj.__len__())
+    if isinstance(obj, ModuleType):
+        return txt, ({
+            'text/plain': pydoc.render_doc(obj, renderer=pydoc.plaintext)
+        }, {})
+    elif callable(obj):
+        return txt, ({
+            'text/plain': pydoc.render_doc(obj, renderer=pydoc.plaintext)
+        }, {})
+    elif hasattr(obj, 'to_html') and getattr(obj, 'to_html') is not None:
+        try:
+            html = obj.to_html()
+            return txt, {'text/html': html}
+        except Exception as e:
+            return txt, __short_repr(obj)
+    else:
+        return txt, __short_repr(obj)
 '''
 
 
@@ -48,7 +133,6 @@ class sos_Python:
         self.init_statements = __init_statement__
 
     def get_vars(self, names):
-        self.sos_kernel.run_cell("import pickle", True, False)
         for name in names:
             if self.kernel_name == 'python3':
                 stmt = "globals().update(pickle.loads({!r}))\n".format(
@@ -77,7 +161,7 @@ class sos_Python:
             return {}
 
     def put_vars(self, items, to_kernel=None):
-        stmt = 'import pickle\n__vars__={{ {} }}\n__vars__.update({{x:y for x,y in locals().items() if x.startswith("sos")}})\npickle.dumps(__vars__)'.format(
+        stmt = '__vars__={{ {} }}\n__vars__.update({{x:y for x,y in locals().items() if x.startswith("sos")}})\npickle.dumps(__vars__)'.format(
             ','.join('"{0}":{0}'.format(x) for x in items))
         try:
             # sometimes python2 kernel would fail to send a execute_result and lead to an error
@@ -90,7 +174,7 @@ class sos_Python:
         if (self.kernel_name == 'python3' and to_kernel == 'Python3') or \
                 (self.kernel_name == 'python2' and to_kernel == 'Python2'):
             # to self, this should allow all variables to be passed
-            return 'import pickle\nglobals().update(pickle.loads({}))'.format(
+            return 'globals().update(pickle.loads({}))'.format(
                 response['data']['text/plain'])
         try:
             ret = self.load_pickled(eval(response['data']['text/plain']))
@@ -102,6 +186,14 @@ class sos_Python:
                 items, e))
             return {}
 
+    def preview(self, item):
+        try:
+            response = self.sos_kernel.get_response(f'pickle.dumps(__preview_var("{item}"))',
+                                                    ['execute_result'])[-1][1]
+            return self.load_pickled(eval(response['data']['text/plain']))
+        except Exception as e:
+            env.log_to_file('PREVIEW', f'Failed to preview {item}: {e}')
+            return '', f'No preview is available {e}'
 
     def sessioninfo(self):
         modules = self.sos_kernel.get_response(

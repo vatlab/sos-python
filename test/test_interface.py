@@ -62,19 +62,19 @@ class TestInterface(NotebookTest):
         notebook.call('sosInPython2 = 12345', kernel="Python2")
         assert '12345' == notebook.check_output('sosInPython2', kernel='SoS')
 
-    @pytest.mark.skip
     def test_py2_preview(self, notebook):
         '''Test support for %preview'''
         output = notebook.check_output(
             '''\
             %preview -n var
-            var = seq(1, 1000)
+            var = list(range(100))
             ''',
             kernel="Python2")
         # in a normal var output, 100 would be printed. The preview version would show
         # type and some of the items in the format of
         #   int [1:1000] 1 2 3 4 5 6 7 8 9 10 ...
-        assert 'int' in output and '3' in output and '9' in output and '111' not in output
+        assert 'list' in output and '100' in output and '1' in output and '99' not in output
+
         #
         # return 'Unknown variable' for unknown variable
         assert 'Unknown variable' in notebook.check_output(
@@ -140,19 +140,18 @@ class TestInterface(NotebookTest):
         notebook.call('sosInPython3 = 12345', kernel="Python3")
         assert '12345' == notebook.check_output('sosInPython3', kernel='SoS')
 
-    @pytest.mark.skip
     def test_py3_preview(self, notebook):
         '''Test support for %preview'''
         output = notebook.check_output(
             '''\
             %preview -n var
-            var = seq(1, 1000)
+            var = list(range(100))
             ''',
             kernel="Python3")
         # in a normal var output, 100 would be printed. The preview version would show
         # type and some of the items in the format of
-        #   int [1:1000] 1 2 3 4 5 6 7 8 9 10 ...
-        assert 'int' in output and '3' in output and '9' in output and '111' not in output
+        #   0, 1, ... (100 items)
+        assert 'list' in output and '100' in output and '1' in output and '99' not in output
         #
         # return 'Unknown variable' for unknown variable
         assert 'Unknown variable' in notebook.check_output(
