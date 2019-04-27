@@ -54,9 +54,12 @@ install:
     - pip install pygments ipython wand graphviz sos sos-notebook
     - python -m sos_notebook.install
 
-
     # install sos-r
     - pip install . -U
+
+    # we also need to set up path to python2 bin etc
+    - set PATH=C:\Miniconda36-x64\envs\ipykernel_py2\;C:\Miniconda36-x64\envs\ipykernel_py2\Library\bin;%PATH%
+    - set PATH=C:\Miniconda36-x64\envs\sos_test\;C:\Miniconda36-x64\envs\sos_test\Library\bin;%PATH%
 
 test_script:
     - cd test
