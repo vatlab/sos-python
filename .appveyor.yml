@@ -32,6 +32,17 @@ install:
     - conda update -q conda
     # Useful for debugging any issues with conda
     - conda info -a
+
+    # install Python 2 kernel
+    - conda create -n ipykernel_py2 python=2 ipykernel
+    - activate ipykernel_py2
+    - python -m ipykernel install --user
+    - conda deactivate
+
+    # python 3 env
+    - conda create -n sos_test python=3.6
+    - activate sos_test
+
     # packages required by SoS
     - pip install pyyaml psutil tqdm nose selenium
     - pip install fasteners pygments networkx pydot pydotplus
@@ -43,11 +54,6 @@ install:
     - pip install pygments ipython wand graphviz sos sos-notebook
     - python -m sos_notebook.install
 
-    # install Python 2 kernel
-    - conda create -n ipykernel_py2 python=2 ipykernel
-    - activate ipykernel_py2
-    - python -m ipykernel install --user
-    - conda deactivate
 
     # install sos-r
     - pip install . -U
