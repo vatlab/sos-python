@@ -123,7 +123,8 @@ class sos_Python:
     background_color = {'Python2': '#FFF177', 'Python3': '#FFD91A'}
     options = {
         'variable_pattern': r'^\s*[_A-Za-z0-9\.]+\s*$',
-        'assignment_pattern': r'^\s*([_A-Za-z0-9\.]+)\s*=.*$'
+        'assignment_pattern': r'^\s*([_A-Za-z0-9\.]+)\s*=.*$',
+        'indentation_aware': True
     }
     cd_command = 'import os;os.chdir({dir!r})'
 
