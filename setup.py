@@ -15,7 +15,7 @@ with open('src/sos_python/_version.py') as version:
 setup(
     name="sos-python",
     version=__version__,
-    description='SoS Notebook extension for languages Python 2 and Python 2',
+    description='SoS Notebook extension for languages Python 2 and Python 3',
     author='Bo Peng',
     url='https://github.com/vatlab/SOS',
     author_email='bpeng@mdanderson.org',
