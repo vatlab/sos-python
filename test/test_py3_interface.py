@@ -51,14 +51,6 @@ class TestPy3Interface(NotebookTest):
             kernel="Python3")
         assert os.path.realpath(tmpdir) == os.path.realpath(output)
 
-    def test_auto_vars(self, notebook):
-        '''Test automatic exchange of variables with names starting with sos'''
-        notebook.call('sosInSoS = 123', kernel="SoS")
-        assert '123' == notebook.check_output('sosInSoS', kernel='Python3')
-
-        notebook.call('sosInPython3 = 12345', kernel="Python3")
-        assert '12345' == notebook.check_output('sosInPython3', kernel='SoS')
-
     def test_preview(self, notebook):
         '''Test support for %preview'''
         output = notebook.check_output(
