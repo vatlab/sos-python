@@ -54,14 +54,6 @@ class TestPy2Interface(NotebookTest):
             kernel="Python2")
         assert os.path.realpath(tmpdir) == os.path.realpath(output)
 
-    def test_auto_vars(self, notebook):
-        '''Test automatic exchange of variables with names starting with sos'''
-        notebook.call('sosInSoS = 123', kernel="SoS")
-        assert '123' == notebook.check_output('sosInSoS', kernel='Python2')
-
-        notebook.call('sosInPython2 = 12345', kernel="Python2")
-        assert '12345' == notebook.check_output('sosInPython2', kernel='SoS')
-
     def test_preview(self, notebook):
         '''Test support for %preview'''
         output = notebook.check_output(
