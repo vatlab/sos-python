@@ -175,7 +175,7 @@ class sos_Python:
         if (self.kernel_name == 'python3' and to_kernel == 'Python3') or \
                 (self.kernel_name == 'python2' and to_kernel == 'Python2'):
             # to self, this should allow all variables to be passed
-            return 'globals().update(pickle.loads({}))'.format(
+            return 'import pickle;globals().update(pickle.loads({}))'.format(
                 response['data']['text/plain'])
         try:
             ret = self.load_pickled(eval(response['data']['text/plain']))
