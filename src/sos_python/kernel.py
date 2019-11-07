@@ -5,6 +5,7 @@
 
 import pickle
 from sos.utils import short_repr, env
+from sos.eval import interpolate
 
 #
 # These functions will be imported by both Python2 and Python3 and cannot
@@ -115,6 +116,12 @@ def __preview_var(item):
             return txt, __short_repr(obj)
     else:
         return txt, __short_repr(obj)
+
+def __repr_var(item):
+    if item not in globals():
+        raise ValueError('Undefined variable {}'.format(item))
+    return repr(eval(item))
+
 '''
 
 
@@ -187,10 +194,27 @@ class sos_Python:
                 items, e))
             return {}
 
+    def expand(self, text, sigil):
+        if sigil != '{ }':
+            from sos.parser import replace_sigil
+            text = replace_sigil(text, sigil)
+
+        try:
+            from sos.utils import as_fstring
+            response = self.sos_kernel.get_response(
+                as_fstring(text), ['execute_result'])[-1][1]
+            return eval(response['data']['text/plain'])
+        except Exception as e:
+            err_msg = self.sos_kernel.get_response(
+                as_fstring(text), ('error',), name=('evalue',))[0][1]['evalue']
+            self.sos_kernel.warn(f'Failed to expand "{text}": {err_msg}')
+            return text
+
     def preview(self, item):
         try:
-            response = self.sos_kernel.get_response(f'pickle.dumps(__preview_var("{item}"))',
-                                                    ['execute_result'])[-1][1]
+            response = self.sos_kernel.get_response(
+                f'pickle.dumps(__preview_var("{item}"))',
+                ['execute_result'])[-1][1]
             return self.load_pickled(eval(response['data']['text/plain']))
         except Exception as e:
             env.log_to_file('PREVIEW', f'Failed to preview {item}: {e}')

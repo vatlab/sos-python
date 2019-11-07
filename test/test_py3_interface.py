@@ -51,6 +51,22 @@ class TestPy3Interface(NotebookTest):
             kernel="Python3")
         assert os.path.realpath(tmpdir) == os.path.realpath(output)
 
+    def test_expand(self, notebook):
+        '''Test %expand --in'''
+        notebook.call('var = 100', kernel="Python3")
+        assert 'value is 103' in notebook.check_output(
+            '''\
+            %expand --in Python3
+            value is {var + 3}
+            ''',
+            kernel='Markdown')
+        assert 'value is 102' in notebook.check_output(
+            '''\
+            %expand ${ } --in Python3
+            value is ${var + 2}
+            ''',
+            kernel='Markdown')
+
     def test_preview(self, notebook):
         '''Test support for %preview'''
         output = notebook.check_output(
