@@ -169,13 +169,16 @@ class sos_Python:
             return {}
 
     def put_vars(self, items, to_kernel=None):
-        stmt = '__vars__={{ {} }}\n__vars__.update({{x:y for x,y in locals().items() if x.startswith("sos")}})\npickle.dumps(__vars__)'.format(
-            ','.join('"{0}":{0}'.format(x) for x in items))
+        self.sos_kernel.warn(f'PUT {items}')
+        stmt = '__vars__={{ {} }}\npickle.dumps(__vars__)'.format(','.join(
+            '"{0}":{0}'.format(x) for x in items))
+        self.sos_kernel.warn(stmt)
         try:
             # sometimes python2 kernel would fail to send a execute_result and lead to an error
             response = self.sos_kernel.get_response(stmt,
                                                     ['execute_result'])[-1][1]
-        except:
+        except Exception as e:
+            self.sos_kernel.warn(str(e))
             return {}
 
         # Python3 -> Python3
