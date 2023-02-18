@@ -4,8 +4,9 @@
 # Distributed under the terms of the 3-clause BSD License.
 
 import pickle
-from sos.utils import short_repr, env
+
 from sos.eval import interpolate
+from sos.utils import env, short_repr
 
 #
 # These functions will be imported by both Python2 and Python3 and cannot
@@ -88,7 +89,7 @@ def __short_repr(obj):
 def __preview_var(item):
     # check if 'item' is in the subkernel
     if item not in globals():
-        return '', 'Unknown variable {}'.format(item)
+        return '', f'Unknown variable {item}'
 
     obj = eval(item)
 
@@ -119,7 +120,7 @@ def __preview_var(item):
 
 def __repr_var(item):
     if item not in globals():
-        raise ValueError('Undefined variable {}'.format(item))
+        raise ValueError(f'Undefined variable {item}')
     return repr(eval(item))
 
 '''
@@ -140,59 +141,46 @@ class sos_Python:
         self.kernel_name = kernel_name
         self.init_statements = __init_statement__
 
-    def get_vars(self, names):
+    async def get_vars(self, names, as_var=None):
         for name in names:
             if self.kernel_name == 'python3':
-                stmt = "globals().update(pickle.loads({!r}))\n".format(
-                    pickle.dumps({name: env.sos_dict[name]}))
+                dumped = pickle.dumps({as_var if as_var else name: env.sos_dict[name]})
+                stmt = f"globals().update(pickle.loads({dumped!r}))\n"
             else:
-                stmt = "globals().update(pickle.loads({!r}))\n".format(
-                    pickle.dumps({name: env.sos_dict[name]},
-                                 protocol=2,
-                                 fix_imports=True))
-            self.sos_kernel.run_cell(
-                stmt,
-                True,
-                False,
-                on_error='Failed to get variable {} from SoS to {}'.format(
-                    name, self.kernel_name))
+                dumped = pickle.dumps({as_var if as_var else name: env.sos_dict[name]}, protocol=2, fix_imports=True)
+                stmt = f"globals().update(pickle.loads({dumped!r}))\n"
+            await self.sos_kernel.run_cell(
+                stmt, True, False, on_error=f'Failed to get variable {name} from SoS to {self.kernel_name}')
 
     def load_pickled(self, item):
         if isinstance(item, bytes):
             return pickle.loads(item)
-        elif isinstance(item, str):
+        if isinstance(item, str):
             return pickle.loads(item.encode('utf-8'))
-        else:
-            self.sos_kernel.warn(
-                'Cannot restore from result of pickle.dumps: {}'.format(
-                    short_repr(item)))
-            return {}
+        self.sos_kernel.warn(f'Cannot restore from result of pickle.dumps: {short_repr(item)}')
+        return {}
 
-    def put_vars(self, items, to_kernel=None):
-        stmt = '__vars__={{ {} }}\npickle.dumps(__vars__)'.format(','.join(
-            '"{0}":{0}'.format(x) for x in items))
+    def put_vars(self, items, to_kernel=None, as_var=None):
+        item_expr = ','.join(f'"{as_var if as_var else x}":{x}' for x in items)
+        stmt = f'__vars__={{ {item_expr} }}\npickle.dumps(__vars__)'
         try:
             # sometimes python2 kernel would fail to send a execute_result and lead to an error
-            response = self.sos_kernel.get_response(stmt,
-                                                    ['execute_result'])[-1][1]
-        except Exception as e:
-            self.sos_kernel.warn(f'Failed to execute statement {stmt}: {e}')
+            response = self.sos_kernel.get_response(stmt, ['execute_result'])[-1][1]
+        except:
             return {}
 
         # Python3 -> Python3
         if (self.kernel_name == 'python3' and to_kernel == 'Python3') or \
                 (self.kernel_name == 'python2' and to_kernel == 'Python2'):
             # to self, this should allow all variables to be passed
-            return 'import pickle;globals().update(pickle.loads({}))'.format(
-                response['data']['text/plain'])
+            return f"import pickle;globals().update(pickle.loads({response['data']['text/plain']}))"
         try:
             ret = self.load_pickled(eval(response['data']['text/plain']))
             if self.sos_kernel._debug_mode:
-                self.sos_kernel.warn('Get: {}'.format(ret))
+                self.sos_kernel.warn(f'Get: {ret}')
             return ret
         except Exception as e:
-            self.sos_kernel.warn('Failed to import variables {}: {}'.format(
-                items, e))
+            self.sos_kernel.warn(f'Failed to import variables {items}: {e}')
             return {}
 
     def expand(self, text, sigil):
@@ -202,20 +190,16 @@ class sos_Python:
 
         try:
             from sos.utils import as_fstring
-            response = self.sos_kernel.get_response(
-                as_fstring(text), ['execute_result'])[-1][1]
+            response = self.sos_kernel.get_response(as_fstring(text), ['execute_result'])[-1][1]
             return eval(response['data']['text/plain'])
-        except Exception as e:
-            err_msg = self.sos_kernel.get_response(
-                as_fstring(text), ('error',), name=('evalue',))[0][1]['evalue']
+        except Exception:
+            err_msg = self.sos_kernel.get_response(as_fstring(text), ('error',), name=('evalue',))[0][1]['evalue']
             self.sos_kernel.warn(f'Failed to expand "{text}": {err_msg}')
             return text
 
     def preview(self, item):
         try:
-            response = self.sos_kernel.get_response(
-                f'pickle.dumps(__preview_var("{item}"))',
-                ['execute_result'])[-1][1]
+            response = self.sos_kernel.get_response(f'pickle.dumps(__preview_var("{item}"))', ['execute_result'])[-1][1]
             return self.load_pickled(eval(response['data']['text/plain']))
         except Exception as e:
             env.log_to_file('PREVIEW', f'Failed to preview {item}: {e}')

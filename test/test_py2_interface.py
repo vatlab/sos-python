@@ -5,6 +5,7 @@
 
 import os
 import tempfile
+
 import pytest
 from sos_notebook.test_utils import NotebookTest
 

@@ -18,9 +18,9 @@ setup(
     description='SoS Notebook extension for languages Python 2 and Python 3',
     author='Bo Peng',
     url='https://github.com/vatlab/SOS',
-    author_email='bBo.Peng@bcm.edu',
+    author_email='bo.peng@bcm.edu',
     maintainer='Bo Peng',
-    maintainer_email='bBo.Peng@bcm.edu',
+    maintainer_email='bo.peng@bcm.edu',
     license='3-clause BSD',
     include_package_data=True,
     classifiers=[
@@ -40,7 +40,7 @@ setup(
     package_dir={'': 'src'},
     install_requires=[
         'sos>=0.19.8',
-        'sos-notebook>=0.19.4',
+        'sos-notebook>=0.24.0',
     ],
     entry_points='''
 [sos_languages]
